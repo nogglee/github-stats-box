@@ -58,82 +58,82 @@ async function getStats() {
     return stats;
 }
 
-async function updateGist(stats) {
-    const humanize = (n) => (n >= 1000 ? numeral(n).format(kFormat ? '0.0a' : '0,0') : n);
-
-    const gistContent =
-        [
-            ['⭐', `Total Stars`, humanize(stats.totalStars)],
-            ['➕', countAllCommits ? 'Total Commits' : 'Past Year Commits', humanize(stats.totalCommits)],
-            ['🔀', `Total PRs`, humanize(stats.totalPRs)],
-            ['🚩', `Total Issues`, humanize(stats.totalIssues)],
-            ['📦', `Contributed to`, humanize(stats.contributedTo)],
-        ]
-            .map((content) => {
-                let line = `${content[1]}:${content[2]}`;
-                line = line.replace(':', ':' + ' '.repeat(45 - line.length));
-                line = `${content[0]}    ${line}`;
-                return line;
-            })
-            .join('\n') + '\n';
-
-    const gist = await request('GET /gists/:gist_id', {
-        gist_id: gistId,
-        headers: { authorization: `token ${githubToken}` },
-    });
-    const filename = Object.keys(gist.data.files)[0];
-
-    if (gist.data.files[filename].content === gistContent) {
-        console.info('Nothing to update');
-        return;
-    }
-
-    return request('PATCH /gists/:gist_id', {
-        files: {
-            [filename]: {
-                filename: 'Recent Activity 💻',
-                content: gistContent,
-            },
-        },
-        gist_id: gistId,
-        headers: { authorization: `token ${githubToken}` },
-    }).then(() => {
-        console.info(`Updated Gist ${gistId} with the following content:\n${gistContent}`);
-    });
-}
-// const TARGET_FILENAME = 'Recent Activity 💻';
-
 // async function updateGist(stats) {
-//     const humanize = (n) =>
-//         n >= 1000 ? numeral(n).format(kFormat ? '0.0a' : '0,0') : n;
+//     const humanize = (n) => (n >= 1000 ? numeral(n).format(kFormat ? '0.0a' : '0,0') : n);
 
 //     const gistContent =
 //         [
-//             ['⭐', 'Total Stars', humanize(stats.totalStars)],
+//             ['⭐', `Total Stars`, humanize(stats.totalStars)],
 //             ['➕', countAllCommits ? 'Total Commits' : 'Past Year Commits', humanize(stats.totalCommits)],
-//             ['🔀', 'Total PRs', humanize(stats.totalPRs)],
-//             ['🚩', 'Total Issues', humanize(stats.totalIssues)],
-//             ['📦', 'Contributed to', humanize(stats.contributedTo)],
+//             ['🔀', `Total PRs`, humanize(stats.totalPRs)],
+//             ['🚩', `Total Issues`, humanize(stats.totalIssues)],
+//             ['📦', `Contributed to`, humanize(stats.contributedTo)],
 //         ]
-//             .map(([icon, label, value]) => {
-//                 let line = `${label}:${value}`;
+//             .map((content) => {
+//                 let line = `${content[1]}:${content[2]}`;
 //                 line = line.replace(':', ':' + ' '.repeat(45 - line.length));
-//                 return `${icon}    ${line}`;
+//                 line = `${content[0]}    ${line}`;
+//                 return line;
 //             })
 //             .join('\n') + '\n';
 
-//     await request('PATCH /gists/:gist_id', {
+//     const gist = await request('GET /gists/:gist_id', {
 //         gist_id: gistId,
 //         headers: { authorization: `token ${githubToken}` },
+//     });
+//     const filename = Object.keys(gist.data.files)[0];
+
+//     if (gist.data.files[filename].content === gistContent) {
+//         console.info('Nothing to update');
+//         return;
+//     }
+
+//     return request('PATCH /gists/:gist_id', {
 //         files: {
-//             [TARGET_FILENAME]: {
+//             [filename]: {
+//                 filename: 'Recent Activity 💻',
 //                 content: gistContent,
 //             },
 //         },
+//         gist_id: gistId,
+//         headers: { authorization: `token ${githubToken}` },
+//     }).then(() => {
+//         console.info(`Updated Gist ${gistId} with the following content:\n${gistContent}`);
 //     });
-
-//     console.info(`Updated Gist ${gistId}`);
 // }
+const TARGET_FILENAME = 'Recent Activity 💻';
+
+async function updateGist(stats) {
+    const humanize = (n) =>
+        n >= 1000 ? numeral(n).format(kFormat ? '0.0a' : '0,0') : n;
+
+    const gistContent =
+        [
+            ['⭐', 'Total Stars', humanize(stats.totalStars)],
+            ['➕', countAllCommits ? 'Total Commits' : 'Past Year Commits', humanize(stats.totalCommits)],
+            ['🔀', 'Total PRs', humanize(stats.totalPRs)],
+            ['🚩', 'Total Issues', humanize(stats.totalIssues)],
+            ['📦', 'Contributed to', humanize(stats.contributedTo)],
+        ]
+            .map(([icon, label, value]) => {
+                let line = `${label}:${value}`;
+                line = line.replace(':', ':' + ' '.repeat(45 - line.length));
+                return `${icon}    ${line}`;
+            })
+            .join('\n') + '\n';
+
+    await request('PATCH /gists/:gist_id', {
+        gist_id: gistId,
+        headers: { authorization: `token ${githubToken}` },
+        files: {
+            [TARGET_FILENAME]: {
+                content: gistContent,
+            },
+        },
+    });
+
+    console.info(`Updated Gist ${gistId}`);
+}
 
 main().catch((err) => {
     console.error(err.message);
